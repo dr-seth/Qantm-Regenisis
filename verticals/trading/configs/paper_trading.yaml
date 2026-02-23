@@ -1,0 +1,105 @@
+# Trading Vertical Paper Trading Configuration
+# This configuration is for paper trading validation before live deployment
+
+environment: paper_trading
+
+# Data settings
+data:
+  # Use production data feeds
+  use_testnet: false
+  # Historical data source
+  historical_source: remote
+  historical_path: ./data/historical
+  # Real-time data enabled
+  realtime_enabled: true
+  realtime_buffer_size: 1000
+
+# Platform connections
+platforms:
+  binance:
+    enabled: true
+    testnet: false  # Use real market data
+    paper_trading: true  # But don't execute real trades
+    api_key_env: BINANCE_API_KEY
+    api_secret_env: BINANCE_API_SECRET
+  
+  interactive_brokers:
+    enabled: true
+    paper_trading: true
+    host: 127.0.0.1
+    port: 7497  # Paper trading port
+    client_id: 1
+  
+  quantconnect:
+    enabled: false
+    user_id_env: QC_USER_ID
+    api_token_env: QC_API_TOKEN
+
+# Trading settings
+trading:
+  # Symbols for paper trading
+  symbols:
+    - BTC/USDT
+    - ETH/USDT
+    - SOL/USDT
+    - AVAX/USDT
+  
+  # Risk limits (moderate for paper trading)
+  risk:
+    max_position_size: 0.05  # 5% of portfolio
+    max_daily_loss: 0.03     # 3% daily loss limit
+    max_drawdown: 0.10       # 10% max drawdown
+    max_open_positions: 5
+  
+  # Execution settings
+  execution:
+    order_type: limit
+    slippage_tolerance: 0.002  # 0.2%
+    timeout_seconds: 30
+
+# Nano model settings
+nano_models:
+  model_path: ./trained_models
+  use_pretrained: true
+  # Enable periodic retraining
+  retrain_enabled: true
+  retrain_interval_hours: 24
+
+# Backtesting settings (for validation)
+backtesting:
+  default_start: "2024-01-01"
+  default_end: "2024-12-31"
+  initial_capital: 100000
+  commission:
+    maker: 0.001
+    taker: 0.001
+  slippage:
+    enabled: true
+    model: volume_based
+    base_value: 0.0005
+
+# Monitoring settings
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  dashboard_port: 8080
+  alert_channels:
+    - slack
+    - email
+  
+  # Performance thresholds for alerts
+  thresholds:
+    daily_loss_warning: 0.02
+    daily_loss_critical: 0.03
+    drawdown_warning: 0.05
+    drawdown_critical: 0.10
+
+# Logging settings
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: ./logs/trading_paper.log
+  # Also log to structured format for analysis
+  structured:
+    enabled: true
+    path: ./logs/trading_paper.jsonl

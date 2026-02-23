@@ -1,0 +1,150 @@
+# Trading Vertical Production Configuration
+# WARNING: This configuration is for LIVE TRADING with real money
+# Ensure all safety checks are in place before using this configuration
+
+environment: production
+
+# Data settings
+data:
+  use_testnet: false
+  historical_source: remote
+  historical_path: /data/trading/historical
+  realtime_enabled: true
+  realtime_buffer_size: 5000
+  # Data quality checks
+  quality_checks:
+    enabled: true
+    max_gap_seconds: 60
+    min_volume_threshold: 1000
+
+# Platform connections
+platforms:
+  binance:
+    enabled: true
+    testnet: false
+    paper_trading: false  # LIVE TRADING
+    api_key_env: BINANCE_API_KEY
+    api_secret_env: BINANCE_API_SECRET
+    # Rate limiting
+    rate_limit:
+      requests_per_minute: 1200
+      orders_per_second: 10
+  
+  interactive_brokers:
+    enabled: true
+    paper_trading: false  # LIVE TRADING
+    host: 127.0.0.1
+    port: 7496  # Live trading port
+    client_id: 1
+    # Connection resilience
+    auto_reconnect: true
+    reconnect_delay_seconds: 5
+    max_reconnect_attempts: 10
+  
+  quantconnect:
+    enabled: false
+    user_id_env: QC_USER_ID
+    api_token_env: QC_API_TOKEN
+
+# Trading settings
+trading:
+  symbols:
+    - BTC/USDT
+    - ETH/USDT
+    - SOL/USDT
+    - AVAX/USDT
+  
+  # Risk limits (strict for production)
+  risk:
+    max_position_size: 0.02  # 2% of portfolio per position
+    max_daily_loss: 0.02     # 2% daily loss limit - HARD STOP
+    max_drawdown: 0.05       # 5% max drawdown - HARD STOP
+    max_open_positions: 5
+    # Safety Kernel integration
+    safety_kernel:
+      enabled: true
+      url: http://safety-kernel:8002
+      require_approval: true
+  
+  # Execution settings
+  execution:
+    order_type: limit
+    slippage_tolerance: 0.001  # 0.1%
+    timeout_seconds: 30
+    # Order confirmation
+    require_confirmation: true
+    confirmation_timeout_seconds: 5
+
+# Nano model settings
+nano_models:
+  model_path: /data/trading/models
+  use_pretrained: true
+  retrain_enabled: true
+  retrain_interval_hours: 6
+  # Model validation before deployment
+  validation:
+    enabled: true
+    min_accuracy: 0.55
+    min_sharpe: 0.5
+
+# Monitoring settings
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  dashboard_port: 8080
+  
+  # Alert channels
+  alert_channels:
+    - slack
+    - email
+    - pagerduty
+  
+  # Performance thresholds
+  thresholds:
+    daily_loss_warning: 0.01
+    daily_loss_critical: 0.02
+    drawdown_warning: 0.03
+    drawdown_critical: 0.05
+    latency_warning_ms: 100
+    latency_critical_ms: 500
+  
+  # Health checks
+  health_check:
+    enabled: true
+    interval_seconds: 30
+    timeout_seconds: 10
+
+# Logging settings
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: /var/log/trading/trading_prod.log
+  structured:
+    enabled: true
+    path: /var/log/trading/trading_prod.jsonl
+  # Audit logging for compliance
+  audit:
+    enabled: true
+    path: /var/log/trading/audit.jsonl
+    include_orders: true
+    include_fills: true
+    include_positions: true
+
+# Safety settings
+safety:
+  # Emergency stop conditions
+  emergency_stop:
+    enabled: true
+    conditions:
+      - daily_loss_exceeded
+      - drawdown_exceeded
+      - connection_lost
+      - model_degradation
+  
+  # Circuit breakers
+  circuit_breaker:
+    enabled: true
+    # Pause trading if too many errors
+    error_threshold: 5
+    error_window_seconds: 60
+    pause_duration_seconds: 300

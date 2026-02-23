@@ -1,0 +1,100 @@
+# Trading Vertical Development Configuration
+# This configuration is for local development and testing
+
+environment: development
+
+# Data settings
+data:
+  # Use testnet/sandbox APIs
+  use_testnet: true
+  # Historical data source
+  historical_source: local
+  historical_path: ./data/historical
+  # Real-time data source (disabled in dev)
+  realtime_enabled: false
+
+# Platform connections
+platforms:
+  binance:
+    enabled: true
+    testnet: true
+    # API credentials from environment variables
+    api_key_env: BINANCE_TESTNET_API_KEY
+    api_secret_env: BINANCE_TESTNET_API_SECRET
+  
+  interactive_brokers:
+    enabled: false
+    paper_trading: true
+    host: 127.0.0.1
+    port: 7497  # Paper trading port
+    client_id: 1
+  
+  quantconnect:
+    enabled: true
+    # Credentials from environment variables
+    user_id_env: QC_USER_ID
+    api_token_env: QC_API_TOKEN
+    organization_id_env: QC_ORGANIZATION_ID
+    # API configuration
+    base_url: https://www.quantconnect.com/api/v2
+    timeout: 30
+    # Default settings
+    default_language: Python
+    auto_compile: true
+
+# Trading settings
+trading:
+  # Default symbols for development
+  symbols:
+    - BTC/USDT
+    - ETH/USDT
+  
+  # Risk limits (conservative for development)
+  risk:
+    max_position_size: 0.01  # 1% of portfolio
+    max_daily_loss: 0.02     # 2% daily loss limit
+    max_drawdown: 0.05       # 5% max drawdown
+    max_open_positions: 3
+  
+  # Execution settings
+  execution:
+    order_type: market
+    slippage_tolerance: 0.001  # 0.1%
+
+# Nano model settings
+nano_models:
+  # Model storage path
+  model_path: ./trained_models
+  # Use pre-trained models if available
+  use_pretrained: true
+  # Retrain interval (disabled in dev)
+  retrain_enabled: false
+
+# Backtesting settings
+backtesting:
+  # Default backtest period
+  default_start: "2024-01-01"
+  default_end: "2024-12-31"
+  # Initial capital
+  initial_capital: 100000
+  # Commission settings
+  commission:
+    maker: 0.001  # 0.1%
+    taker: 0.001  # 0.1%
+  # Slippage simulation
+  slippage:
+    enabled: true
+    model: fixed
+    value: 0.0005  # 0.05%
+
+# Monitoring settings
+monitoring:
+  enabled: false
+  metrics_port: 9090
+  dashboard_port: 8080
+
+# Logging settings
+logging:
+  level: DEBUG
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: ./logs/trading_dev.log
