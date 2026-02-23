@@ -1,0 +1,3 @@
+[submodule "QantmOrchstrtr-RSI"]
+	path = QantmOrchstrtr-RSI
+	url = https://github.com/ARYA-Labs-PBC/QantmOrchstrtr-RSI.git
